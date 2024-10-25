@@ -12,5 +12,5 @@ This is the database dev repo for Project Intronomicon from the Korf Lab.
 <!-- TODO -->
 
 ## License
-<!-- TODO -->
-<!-- MIT -->
+
+This project is licensed under the MIT License.

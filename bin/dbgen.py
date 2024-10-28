@@ -15,15 +15,15 @@ cursor = connection.cursor()
 command_create_table_intron = '''CREATE TABLE IF NOT EXISTS intron(
 	intron_ID TEXT PRIMARY KEY,
 	experiment_ID TEXT,
-	organism_ID TEXT,
+	taxonomy_ID TEXT,
 	chromosome_ID TEXT,
-	strand_direction INTEGER NOT NULL CHECK (strand_direction IN (1, -1)),
+	strand_direction INTEGER CHECK (strand_direction IN (1, -1)),
 	start_pos INTEGER,
 	end_pos INTEGER,
 	count INTEGER,
 	tags TEXT,
 	FOREIGN KEY (experiment_ID) REFERENCES experiment (experiment_ID),
-	FOREIGN KEY (organism_ID) REFERENCES organism (organism_ID)
+	FOREIGN KEY (taxonomy_ID) REFERENCES organism (taxonomy_ID)
 	)'''
 
 command_create_table_experiment = '''CREATE TABLE IF NOT EXISTS experiment(
@@ -41,7 +41,7 @@ command_create_table_experiment = '''CREATE TABLE IF NOT EXISTS experiment(
 	)'''
 
 command_create_table_organism = '''CREATE TABLE IF NOT EXISTS organism(
-	organism_ID INTEGER PRIMARY KEY,
+	taxonomy_ID INTEGER PRIMARY KEY,
 	organism_name TEXT
 	)'''
 
@@ -59,7 +59,7 @@ command_create_table_environment = '''CREATE TABLE IF NOT EXISTS environment(
 
 command_create_table_experiment_type = '''CREATE TABLE IF NOT EXISTS experiment_type(
 	experiment_type_ID TEXT PRIMARY KEY,
-	experiment_type_desc TEXT
+	experiment_type_name TEXT
 	)'''
 
 '''command execution'''

@@ -7,12 +7,9 @@ import xml.etree.ElementTree as ET
 
 
 def get_text(element):
-	if element is None:
+	if element is None or element.text is None:
 		return ''
-	elif element.text is None:
-		return ''
-	else:
-		return element.text.strip()
+	return element.text.strip()
 
 
 def parse_experiment_package(root):
@@ -126,7 +123,7 @@ def parse_sep_xml(xml_text):
 
 """components"""
 db = 'sra'
-id = '116183'
+id = '427'
 base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 
 """assemble the efetch URL"""
@@ -141,6 +138,6 @@ metadata = parse_sep_xml(response.text)
 print(json.dumps(metadata, ensure_ascii=False, indent=4))
 
 '''output to json file'''
-# with open(f'./metadata{id}.json', 'w', encoding="utf-8") as outfile:
-# 	json.dump(metadata, outfile, ensure_ascii=False, indent=4)
+with open(f'./metadata{id}.json', 'w', encoding="utf-8") as outfile:
+	json.dump(metadata, outfile, ensure_ascii=False, indent=4)
 

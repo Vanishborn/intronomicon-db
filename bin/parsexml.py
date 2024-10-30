@@ -123,7 +123,7 @@ def parse_sep_xml(xml_text):
 
 """components"""
 db = 'sra'
-id = '427'
+id = '35593488'
 base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
 
 """assemble the efetch URL"""

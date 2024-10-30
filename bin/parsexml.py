@@ -141,3 +141,4 @@ print(json.dumps(metadata, ensure_ascii=False, indent=4))
 with open(f'./metadata{id}.json', 'w', encoding="utf-8") as outfile:
 	json.dump(metadata, outfile, ensure_ascii=False, indent=4)
 
+# sqlite

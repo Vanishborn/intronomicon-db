@@ -1,4 +1,5 @@
 import requests
+import sys
 import time
 import xml.etree.ElementTree as ET
 
@@ -20,13 +21,16 @@ response = requests.get(url)
 response.encoding = 'utf-8'
 
 """parse the initial response for Count"""
-esearch_tree = ET.fromstring(response.text)
+try:
+	esearch_tree = ET.fromstring(response.text)
+except:
+	sys.exit("Server error, please try again later")
 count = get_text(esearch_tree.find('Count'))
 print(f"There are {count} total results available")
 
 """wait to avoid ip ban"""
-sleep_time = 10
-print(f"Delaying {sleep_time} seconds to avoid ip ban")
+sleep_time = 1
+print(f"Delaying {sleep_time} seconds to avoid IP ban")
 time.sleep(sleep_time)
 
 """full request using the count as retmax"""
@@ -36,8 +40,21 @@ print(url)
 response = requests.get(url)
 response.encoding = 'utf-8'
 
+"""extract all IDs from the IdList"""
+try:
+	esearch_tree = ET.fromstring(response.text)
+except:
+	sys.exit("Server error, please try again later")
+ids = esearch_tree.findall('./IdList/Id')
+id_list = [get_text(id) for id in ids]
+
 """save the returned xml to file"""
 with open('./esearch_out.xml', 'w') as file:
 	file.write(response.text)
 
-print("----eSearch complete----")
+"""save the returned ids to a text file""" 
+with open('./esearch_out.txt', 'w') as file: 
+	for id in id_list: 
+		file.write(id + '\n')
+
+print("----eSearch complete, IDs saved----")

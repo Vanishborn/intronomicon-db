@@ -1,9 +1,7 @@
 # generate initial intronomicon.db file and tables using sqlite3
 
-# dev v0.0.1
-# table content subject to change
-# TODO
-# finally settle on the info to keep from exp. package xml
+# dev v0.0.2
+# table columns finalized
 
 import sqlite3
 
@@ -14,61 +12,45 @@ cursor = connection.cursor()
 '''create table commands'''
 command_create_table_intron = '''CREATE TABLE IF NOT EXISTS intron(
 	intron_ID TEXT PRIMARY KEY,
-	experiment_ID TEXT,
-	taxonomy_ID TEXT,
-	chromosome_ID TEXT,
-	strand_direction INTEGER CHECK (strand_direction IN (1, -1)),
+	exp_ID TEXT,
+	tax_ID TEXT,
+	chr_ID TEXT,
+	strand_dir INTEGER CHECK (strand_dir IN (1, -1)),
 	start_pos INTEGER,
 	end_pos INTEGER,
 	count INTEGER,
 	tags TEXT,
-	FOREIGN KEY (experiment_ID) REFERENCES experiment (experiment_ID),
-	FOREIGN KEY (taxonomy_ID) REFERENCES organism (taxonomy_ID)
+	FOREIGN KEY (exp_ID) REFERENCES experiment (exp_ID),
+	FOREIGN KEY (tax_ID) REFERENCES organism (tax_ID)
 	)'''
 
 command_create_table_experiment = '''CREATE TABLE IF NOT EXISTS experiment(
-	experiment_ID TEXT PRIMARY KEY,
-	experiment_name TEXT,
-	experiment_type_ID TEXT,
-	SRX_page_ID INTEGER,
-	genotype TEXT,
-	lifecycle TEXT,
-	tissue TEXT,
-	environment TEXT,
-	FOREIGN KEY (experiment_type_ID) REFERENCES experiment_type (experiment_type_ID),
-	FOREIGN KEY (tissue) REFERENCES tissues (tissue_ID),
-	FOREIGN KEY (environment) REFERENCES environment (environment_ID)
+	exp_ID TEXT PRIMARY KEY,
+	exp_title TEXT,
+	study_title TEXT,
+	attributes TEXT,
+	full_info TEXT
 	)'''
 
 command_create_table_organism = '''CREATE TABLE IF NOT EXISTS organism(
-	taxonomy_ID INTEGER PRIMARY KEY,
-	organism_name TEXT
+	tax_ID INTEGER PRIMARY KEY,
+	sci_name TEXT
 	)'''
 
-command_create_table_tissue = '''CREATE TABLE IF NOT EXISTS tissue(
-	tissue_ID TEXT PRIMARY KEY,
-	tissue_name TEXT
-	)'''
-
-command_create_table_environment = '''CREATE TABLE IF NOT EXISTS environment(
-	environment_ID TEXT PRIMARY KEY,
-	temp REAL,
-	chemical TEXT,
-	external TEXT
-	)'''
-
-command_create_table_experiment_type = '''CREATE TABLE IF NOT EXISTS experiment_type(
-	experiment_type_ID TEXT PRIMARY KEY,
-	experiment_type_name TEXT
+command_create_table_runs = '''CREATE TABLE IF NOT EXISTS runs(
+	run_ID TEXT PRIMARY KEY,
+	exp_ID TEXT,
+	bases INTEGER,
+	spots INTEGER,
+	file_size INTEGER,
+	FOREIGN KEY (exp_ID) REFERENCES experiment (exp_ID)
 	)'''
 
 '''command execution'''
 cursor.execute(command_create_table_intron)
 cursor.execute(command_create_table_experiment)
 cursor.execute(command_create_table_organism)
-cursor.execute(command_create_table_tissue)
-cursor.execute(command_create_table_environment)
-cursor.execute(command_create_table_experiment_type)
+cursor.execute(command_create_table_runs)
 
 '''insert values'''
 # TODO
@@ -81,3 +63,7 @@ cursor.execute(command_create_table_experiment_type)
 # cursor.execute('''SELECT * FROM {TABLE}''')
 # query_results = cursor.fetchall()
 # print(query_results)
+
+'''commit and close'''
+connection.commit()
+connection.close()

@@ -41,7 +41,7 @@ response.encoding = 'utf-8'
 try:
 	esearch_tree = ET.fromstring(response.text)
 except:
-	sys.exit("Server error, please try again later")
+	sys.exit("NIH server error, please try again later")
 count = get_text(esearch_tree.find('Count'))
 print(f"There are {count} total results available")
 
@@ -58,8 +58,8 @@ response = requests.get(url)
 response.encoding = 'utf-8'
 
 """save the returned xml to file""" 
-xml_filename = './pmid-esearch-returns.xml'
-with open(xml_filename, 'w') as file: 
+xml_file = './pmid-esearch-returns.xml'
+with open(xml_file, 'w') as file: 
 	file.write(response.text)
 
 """extract all IDs from the IdList"""
@@ -71,6 +71,7 @@ ids = esearch_tree.findall('./IdList/Id')
 new_id_list = [get_text(id) for id in ids]
 new_ids_set = set(new_id_list)
 
+"""load IDs from last search"""
 ids_file = './pmid-new.txt'
 ids_set = load_ids(ids_file)
 

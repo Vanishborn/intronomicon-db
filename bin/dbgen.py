@@ -1,9 +1,12 @@
 # generate initial intronomicon.db file and tables using sqlite3
 
-# dev v0.0.2
-# table columns finalized
+__author__ = "Henry Li"
+__version__ = "0.0.2"
+__status__ = "Development"
+
 
 import sqlite3
+
 
 connection = sqlite3.connect("intronomicon.db")
 

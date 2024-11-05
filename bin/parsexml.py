@@ -1,5 +1,10 @@
 # parse SraExperimentPackage XML for metadata
 
+__author__ = "Henry Li"
+__version__ = "0.0.2"
+__status__ = "Development"
+
+
 import json
 import requests
 import sqlite3
@@ -141,4 +146,31 @@ print(json.dumps(metadata, ensure_ascii=False, indent=4))
 with open(f'./metadata{id}.json', 'w', encoding="utf-8") as outfile:
 	json.dump(metadata, outfile, ensure_ascii=False, indent=4)
 
-# sqlite
+'''sqlite'''
+connection = sqlite3.connect("intronomicon.db")
+cursor = connection.cursor()
+
+'''insert into experiment table'''
+exp_data = metadata['Experiment']
+exp_id = exp_data['Accession']
+exp_title = exp_data['Title']
+study_title = metadata['Study']['Title']
+attributes = json.dumps(metadata['Sample']['Attributes'])
+full_info = json.dumps(metadata)
+cursor.execute('''INSERT OR IGNORE INTO experiment (exp_ID, exp_title, study_title, attributes, full_info) VALUES (?, ?, ?, ?, ?)''', (exp_id, exp_title, study_title, attributes, full_info))
+
+'''insert into organism table'''
+tax_id = metadata['Sample']['Taxon ID']
+sci_name = metadata['Sample']['Scientific Name']
+cursor.execute('''INSERT OR IGNORE INTO organism (tax_ID, sci_name) VALUES (?, ?)''', (tax_id, sci_name))
+
+'''insert into runs table'''
+for run in metadata['Run Set']['Run Details']:
+	run_id = run['Run Accession Number']
+	bases = int(run['Bases'])
+	spots = int(run['Spots'])
+	file_size = int(run['Size'])
+	cursor.execute('''INSERT OR IGNORE INTO runs (run_ID, exp_ID, bases, spots, file_size) VALUES (?, ?, ?, ?, ?)''', (run_id, exp_id, bases, spots, file_size))
+
+connection.commit()
+connection.close()

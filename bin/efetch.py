@@ -1,5 +1,10 @@
 # download srx xmls using eFetch
 
+__author__ = "Henry Li"
+__version__ = "0.0.2"
+__status__ = "Development"
+
+
 import requests
 import time
 import os

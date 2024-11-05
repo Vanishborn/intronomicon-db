@@ -1,3 +1,11 @@
+# get a list of PMIDs filtered by keys using eSearch
+
+__author__ = "Henry Li"
+__version__ = "0.0.2"
+__status__ = "Development"
+
+
+import os
 import requests
 import sys
 import time
@@ -7,6 +15,15 @@ import xml.etree.ElementTree as ET
 """function to get text from XML elements"""
 def get_text(element, default=''):
 	return element.text.strip() if element is not None else default
+
+
+"""function to load IDs from file"""
+def load_ids(filename):
+	if os.path.exists(filename):
+		with open(filename, 'r') as file:
+			return set(line.strip() for line in file)
+	return set()
+
 
 """components"""
 db = 'sra'
@@ -40,21 +57,48 @@ print(url)
 response = requests.get(url)
 response.encoding = 'utf-8'
 
+"""save the returned xml to file""" 
+xml_filename = './pmid-esearch-returns.xml'
+with open(xml_filename, 'w') as file: 
+	file.write(response.text)
+
 """extract all IDs from the IdList"""
 try:
 	esearch_tree = ET.fromstring(response.text)
 except:
-	sys.exit("Server error, please try again later")
+	sys.exit("NIH server error, please try again later")
 ids = esearch_tree.findall('./IdList/Id')
-id_list = [get_text(id) for id in ids]
+new_id_list = [get_text(id) for id in ids]
+new_ids_set = set(new_id_list)
 
-"""save the returned xml to file"""
-with open('./esearch_out.xml', 'w') as file:
-	file.write(response.text)
+ids_file = './pmid-new.txt'
+ids_set = load_ids(ids_file)
 
-"""save the returned ids to a text file""" 
-with open('./esearch_out.txt', 'w') as file: 
-	for id in id_list: 
-		file.write(id + '\n')
+"""identify new IDs"""
+added_ids_set = new_ids_set - ids_set
 
-print("----eSearch complete, IDs saved----")
+if added_ids_set:
+	print(f"Found {len(added_ids_set)} new IDs")
+
+	"""save added IDs to pmid-additions.txt"""
+	additions_file = './pmid-additions.txt'
+	with open(additions_file, 'w') as file:
+		for id in added_ids_set:
+			file.write(id + '\n')
+
+	"""backup old pmid-new.txt to pmid-last.txt"""
+	"""if not first time running"""
+	if os.path.exists(ids_file):
+		old_ids_file = './pmid-last.txt'
+		with open(ids_file, 'r') as src_file:
+			with open(old_ids_file, 'w') as dest_file:
+					for line in src_file:
+						dest_file.write(line)
+
+	"""overwrite all IDs to pmid-new.txt"""
+	with open(ids_file, 'w') as file:
+		for id in new_id_list:
+			file.write(id + '\n')
+	print("----eSearch complete, PMIDs saved----")
+else:
+	sys.exit("No new PMID found, exiting")

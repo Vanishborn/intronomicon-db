@@ -1,5 +1,5 @@
 
 /build
-esearch_out.xml
-esearch_out.txt
+pmid-*
+exp.py
 .DS_Store

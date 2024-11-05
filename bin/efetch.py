@@ -21,12 +21,12 @@ def download_file(id, output_directory):
 			file.write(response.text)
 		return True
 	else:
-		with open('error_log.txt', 'a') as log_file:
+		with open('efetch_error_log.txt', 'a') as log_file:
 			log_file.write(f"{id}\n")
 		return False
 
 
-with open('./esearch_out.txt', 'r') as infile:
+with open('./pmid-additions.txt', 'r') as infile:
 	ids = [line.strip() for line in infile]
 
 output_directory = './downloads'

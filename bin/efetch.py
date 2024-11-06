@@ -48,15 +48,18 @@ def retry_failed_downloads(failed_ids, output_directory, retries=2, delay=300):
 	return failed_ids
 
 
-def append_to_tar_gz(source_dir, id_set, tar_filename):
-	mode = "a:gz" if os.path.exists(tar_filename) else "w:gz"
-	with tarfile.open(tar_filename, mode) as tar:
-		for id in id_set:
-			file_name = f'{id}.xml'
-			file_path = os.path.join(source_dir, file_name)
-			if os.path.exists(file_path):
-				tar.add(file_path, arcname=file_name)
-				print(f"File {file_name} added to {tar_filename}")
+def create_tar_gz(source_dir, tar_filepath):
+	file_count = 0
+	tar_filename = os.path.basename(tar_filepath)
+	with tarfile.open(tar_filepath, "w:gz") as tar:
+		for file_name in os.listdir(source_dir):
+			if file_name.endswith('.xml'):
+				file_path = os.path.join(source_dir, file_name)
+				if os.path.exists(file_path):
+					tar.add(file_path, arcname=file_name)
+					print(f"File {file_name} added to {tar_filename}")
+					file_count += 1
+	print(f"----{file_count} XMLs in total are now in the archive----")
 
 
 """remove previous error log, if any"""
@@ -87,8 +90,6 @@ s_count = todo_count - f_count
 print("----Initial download complete----")
 print(f"Successful downloads: {s_count}\nFailed downloads: {f_count}")
 
-tar_filename = os.path.join(output_directory, '..', 'sraexppkg.tar.gz')
-
 """retrying failed attempts"""
 if failed_ids:
 	print(f"----{f_count} files failed to download----")
@@ -108,9 +109,6 @@ if failed_ids:
 		for id in success_set:
 			success_file.write(id + '\n')
 
-	"""append newly downloaded files to the tar.gz file"""
-	append_to_tar_gz(output_directory, success_set, tar_filename)
-
 	"""additional download status report after retries"""
 	print(f"----Download complete after retries----")
 	print(f"Successful downloads: {s_count}\nFailed downloads: {f_count}")
@@ -118,8 +116,8 @@ if failed_ids:
 else:
 	if os.path.exists('efetch_error_log.txt'):
 		os.remove('efetch_error_log.txt')
+	print("----All files successfully downloaded----")
 
-	"""append newly downloaded files to the tar.gz file"""
-	append_to_tar_gz(output_directory, todo_set, tar_filename)
-
-	print("All files successfully downloaded")
+"""append newly downloaded files to the tar.gz file"""
+tar_filepath = os.path.join(output_directory, '..', 'sraexppkg.tar.gz')
+create_tar_gz(output_directory, tar_filepath)

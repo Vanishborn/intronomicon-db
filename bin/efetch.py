@@ -67,12 +67,15 @@ if os.path.exists('efetch_error_log.txt'):
 	os.remove('efetch_error_log.txt')
 
 """create download directory"""
-output_directory = './downloads'
+# change download directory of the XML files
+output_directory = '/PATH/TO/XML/DOWNLOADS'
 if not os.path.exists(output_directory):
 	os.makedirs(output_directory)
 
 """read PMID for download"""
-with open('./pmid-additions.txt', 'r') as infile:
+# change, if necessary, the additions file to read from
+additions_directory = './pmid-additions.txt'
+with open(additions_directory, 'r') as infile:
 	todo_set = set([line.strip() for line in infile])
 todo_count = len(todo_set)
 print(f"----Read {todo_count} files to be downloaded----")
@@ -82,7 +85,7 @@ failed_ids = []
 for id in todo_set:
 	if not download_file(id, output_directory):
 		failed_ids.append(id)
-	time.sleep(2)
+	time.sleep(1)
 
 """initial download status report"""
 f_count = len(failed_ids)

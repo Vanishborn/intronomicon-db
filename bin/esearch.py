@@ -1,8 +1,8 @@
 # get a list of PMIDs filtered by keys using eSearch
 
 __author__ = "Henry Li"
-__version__ = "0.0.3"
-__status__ = "Development"
+__version__ = "1.0.0"
+__status__ = "Production"
 
 
 import os
@@ -80,6 +80,13 @@ added_ids_set = new_ids_set - ids_set
 
 if added_ids_set:
 	print(f"Found {len(added_ids_set)} new IDs")
+
+	"""overwrite check"""
+	"""usr_direction = input("Proceed? (y/N)")
+	if usr_direction == '':
+		sys.exit("----Process canceled by user, exiting----")
+	elif usr_direction not in ['y', 'Y']:
+		sys.exit("----User direction error, exiting----")"""
 
 	"""save added IDs to pmid-additions.txt"""
 	additions_file = './pmid-additions.txt'

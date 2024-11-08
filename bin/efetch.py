@@ -1,8 +1,8 @@
 # download srx xmls using eFetch
 
 __author__ = "Henry Li"
-__version__ = "0.0.3"
-__status__ = "Development"
+__version__ = "1.0.0"
+__status__ = "Production"
 
 
 import os
@@ -85,7 +85,8 @@ failed_ids = []
 for id in todo_set:
 	if not download_file(id, output_directory):
 		failed_ids.append(id)
-	time.sleep(1)
+	sleep_time = 1
+	time.sleep(sleep_time)
 
 """initial download status report"""
 f_count = len(failed_ids)

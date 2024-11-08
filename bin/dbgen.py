@@ -1,8 +1,8 @@
 # generate initial intronomicon.db file and tables using sqlite3
 
 __author__ = "Henry Li"
-__version__ = "0.0.3"
-__status__ = "Development"
+__version__ = "1.0.0"
+__status__ = "Production"
 
 
 import sqlite3
@@ -57,12 +57,12 @@ cursor.execute(command_create_table_runs)
 
 """insert values"""
 # TODO
-# or just as general notes
+# as general usage notes
 # cursor.execute('''INSERT INTO {TABLE} VALUES ({COL1.VAL}, {COL2.VAL}, ... )''')
 
 """get values"""
 # TODO
-# or just as general notes
+# as general usage notes
 # cursor.execute('''SELECT * FROM {TABLE}''')
 # query_results = cursor.fetchall()
 # print(query_results)
@@ -70,3 +70,6 @@ cursor.execute(command_create_table_runs)
 """commit and close"""
 connection.commit()
 connection.close()
+
+"""summary"""
+print("----DB Genereated----")

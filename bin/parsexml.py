@@ -1,8 +1,8 @@
 # parse SraExperimentPackage XML for metadata
 
 __author__ = "Henry Li"
-__version__ = "0.0.3"
-__status__ = "Development"
+__version__ = "1.0.0"
+__status__ = "Production"
 
 
 import json

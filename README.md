@@ -4,7 +4,7 @@ This is the database dev repo for Project Intronomicon from The Korf Lab. Develo
 
 ## Background
 
-To facilitate intron splicing research in C. elegans (and potentially other model species in the future), having a comprehensive database detailing all possible product introns would be handy. This database houses all existing C. elegans experiments published and with RUN files submitted to the SRA database on NCBI. The database is supported by sqlite. Users of this code can create the database following the steps in the [Usage](#usage) section.
+To facilitate intron splicing research in C. elegans (and potentially other model species in the future), having a comprehensive database detailing all possible product introns would be handy. This database houses all existing C. elegans experiments published and with RUN files submitted to the SRA database on NCBI. The database is supported by SQLite. Users of this code can create the database following the steps in the [Usage](#usage) section.
 
 ## Schema
 
@@ -40,11 +40,11 @@ Assuming any version of Python 3 is installed, use the following command to inst
 pip install requests
 ```
 
-### Check sqlite3 Availability
+### Check SQLite Availability
 
-Sqlite is most likely built in on a Mac or recent Linux installations.
+SQLite is most likely built in on a Mac or recent Linux installations.
 
-The following command returns the version of your sqlite3 installation:
+The following command returns the version of your SQLite installation:
 
 ```
 sqlite3 --version

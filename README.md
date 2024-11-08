@@ -28,7 +28,7 @@ The following features are available:
 
 ## Dependencies
 
-The `requests` package for Python is used to work with the E-Utilities, handling returned XML infoamation from eSearch URLs.
+The `requests` package for Python is used to work with the NCBI E-Utilities, handling returned XML information from eSearch URLs.
 
 ## Installation
 
@@ -102,7 +102,7 @@ To perform eFetch to download all SraExperimentPackage XML files in the addition
 python3 efetch.py
 ```
 
-To insert and update info from the XML files in additions.txt to the db,
+To insert and update info from the XML files in additions.txt to the database,
 
 ```
 python3 parsexml.py

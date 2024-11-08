@@ -1,7 +1,7 @@
 # generate initial intronomicon.db file and tables using sqlite3
 
 __author__ = "Henry Li"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __status__ = "Development"
 
 
@@ -12,7 +12,7 @@ connection = sqlite3.connect("intronomicon.db")
 
 cursor = connection.cursor()
 
-'''create table commands'''
+"""create table commands"""
 command_create_table_intron = '''CREATE TABLE IF NOT EXISTS intron(
 	intron_ID TEXT PRIMARY KEY,
 	exp_ID TEXT,
@@ -49,24 +49,24 @@ command_create_table_runs = '''CREATE TABLE IF NOT EXISTS runs(
 	FOREIGN KEY (exp_ID) REFERENCES experiment (exp_ID)
 	)'''
 
-'''command execution'''
+"""command execution"""
 cursor.execute(command_create_table_intron)
 cursor.execute(command_create_table_experiment)
 cursor.execute(command_create_table_organism)
 cursor.execute(command_create_table_runs)
 
-'''insert values'''
+"""insert values"""
 # TODO
 # or just as general notes
 # cursor.execute('''INSERT INTO {TABLE} VALUES ({COL1.VAL}, {COL2.VAL}, ... )''')
 
-'''get values'''
+"""get values"""
 # TODO
 # or just as general notes
 # cursor.execute('''SELECT * FROM {TABLE}''')
 # query_results = cursor.fetchall()
 # print(query_results)
 
-'''commit and close'''
+"""commit and close"""
 connection.commit()
 connection.close()

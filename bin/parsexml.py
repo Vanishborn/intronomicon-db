@@ -1,12 +1,12 @@
 # parse SraExperimentPackage XML for metadata
 
 __author__ = "Henry Li"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __status__ = "Development"
 
 
 import json
-import requests
+import os
 import sqlite3
 import xml.etree.ElementTree as ET
 
@@ -37,6 +37,8 @@ def parse_experiment_package(root):
 			'Library Selection': get_text(experiment.find('DESIGN/LIBRARY_DESCRIPTOR/LIBRARY_SELECTION')),
 			'Instrument Model': get_text(experiment.find('PLATFORM/ILLUMINA/INSTRUMENT_MODEL'))
 		}
+	else:
+		return None
 
 	# Parse Submission
 	submission = root.find('SUBMISSION')
@@ -49,6 +51,8 @@ def parse_experiment_package(root):
 			'Primary ID': get_text(submission.find('IDENTIFIERS/PRIMARY_ID')),
 			'Submitter ID': get_text(submission.find('IDENTIFIERS/SUBMITTER_ID'))
 		}
+	else:
+		return None
 
 	# Parse Study
 	study = root.find('STUDY')
@@ -63,6 +67,8 @@ def parse_experiment_package(root):
 			'Type': study.find('DESCRIPTOR/STUDY_TYPE').attrib.get('existing_study_type', ''),
 			'Abstract': get_text(study.find('DESCRIPTOR/STUDY_ABSTRACT'))
 		}
+	else:
+		return None
 
 	# Parse Sample
 	sample = root.find('SAMPLE')
@@ -84,30 +90,35 @@ def parse_experiment_package(root):
 			if tag:
 				attributes_dict[tag] = value
 		metadata['Sample']['Attributes'] = attributes_dict
+	else:
+		return None
 
 	# Parse Pool Information
 	metadata['Pool'] = []
-	for member in root.findall('Pool/Member'):
-		metadata['Pool'].append({
-			'Member Name': member.attrib.get('member_name', ''),
-			'Accession': member.attrib.get('accession', ''),
-			'Sample Name': member.attrib.get('sample_name', ''),
-			'Spots': member.attrib.get('spots', ''),
-			'Bases': member.attrib.get('bases', ''),
-			'Tax ID': member.attrib.get('tax_id', ''),
-			'Organism': member.attrib.get('organism', '')
-		})
+	try:
+		for member in root.findall('Pool/Member'):
+			metadata['Pool'].append({
+				'Member Name': member.attrib.get('member_name', ''),
+				'Accession': member.attrib.get('accession', ''),
+				'Sample Name': member.attrib.get('sample_name', ''),
+				'Spots': member.attrib.get('spots', ''),
+				'Bases': member.attrib.get('bases', ''),
+				'Tax ID': member.attrib.get('tax_id', ''),
+				'Organism': member.attrib.get('organism', '')
+			})
+	except:
+		return None
 
 	# Parse Run Set Information
 	run_set = root.find('RUN_SET')
 	if run_set is not None:
 		metadata['Run Set'] = {
-            'Runs': run_set.attrib.get('runs', ''),
-            'Bases': run_set.attrib.get('bases', ''),
-            'Total Spots': run_set.attrib.get('spots', ''),
-            'Total Bytes': run_set.attrib.get('bytes', ''),
-            'Run Details': []
-        }
+			'Runs': run_set.attrib.get('runs', ''),
+			'Bases': run_set.attrib.get('bases', ''),
+			'Total Spots': run_set.attrib.get('spots', ''),
+			'Total Bytes': run_set.attrib.get('bytes', ''),
+			'Run Details': []
+		}
 		for run in run_set.findall('RUN'):
 			run_info = {
 				'Run Accession Number': run.attrib.get('accession', ''),
@@ -117,6 +128,8 @@ def parse_experiment_package(root):
 				'Size': run.attrib.get('size', '')
 			}
 			metadata['Run Set']['Run Details'].append(run_info)
+	else:
+		return None
 
 	return metadata
 
@@ -126,51 +139,77 @@ def parse_sep_xml(xml_text):
 	return parse_experiment_package(root.find('EXPERIMENT_PACKAGE'))
 
 
-"""components"""
-db = 'sra'
-id = '35593488'
-base = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/'
+def insert_metadata_to_db(db_directory, metadata):
+	connection = sqlite3.connect(db_directory)
+	cursor = connection.cursor()
 
-"""assemble the efetch URL"""
-url = base + f"efetch.fcgi?db={db}&id={id}"
-print(f"Retrieving SRA Experiment Package using Page ID {id} from URL:")
-print(url)
-response = requests.get(url)
-response.encoding = 'utf-8'
+	'''insert into experiment table'''
+	exp_data = metadata['Experiment']
+	exp_id = exp_data['Accession']
+	exp_title = exp_data['Title']
+	study_title = metadata['Study']['Title']
+	attributes = json.dumps(metadata['Sample']['Attributes']) if metadata['Sample']['Attributes'] else ''
+	full_info = json.dumps(metadata)
+	cursor.execute('''INSERT OR IGNORE INTO experiment (exp_ID, exp_title, study_title, attributes, full_info) VALUES (?, ?, ?, ?, ?)''', (exp_id, exp_title, study_title, attributes, full_info))
 
-'''parse XML'''
-metadata = parse_sep_xml(response.text)
-print(json.dumps(metadata, ensure_ascii=False, indent=4))
+	'''insert into organism table'''
+	tax_id = metadata['Sample']['Taxon ID']
+	sci_name = metadata['Sample']['Scientific Name']
+	cursor.execute('''INSERT OR IGNORE INTO organism (tax_ID, sci_name) VALUES (?, ?)''', (tax_id, sci_name))
 
-'''output to json file'''
-with open(f'./metadata{id}.json', 'w', encoding="utf-8") as outfile:
-	json.dump(metadata, outfile, ensure_ascii=False, indent=4)
+	'''insert into runs table'''
+	for run in metadata['Run Set']['Run Details']:
+		run_id = run['Run Accession Number']
+		bases = int(run['Bases']) if run['Bases'] else 0
+		spots = int(run['Spots']) if run['Spots'] else 0
+		file_size = int(run['Size']) if run['Size'] else 0
+		cursor.execute('''INSERT OR IGNORE INTO runs (run_ID, exp_ID, bases, spots, file_size) VALUES (?, ?, ?, ?, ?)''', (run_id, exp_id, bases, spots, file_size))
 
-'''sqlite'''
-connection = sqlite3.connect("intronomicon.db")
-cursor = connection.cursor()
+	connection.commit()
+	connection.close()
 
-'''insert into experiment table'''
-exp_data = metadata['Experiment']
-exp_id = exp_data['Accession']
-exp_title = exp_data['Title']
-study_title = metadata['Study']['Title']
-attributes = json.dumps(metadata['Sample']['Attributes'])
-full_info = json.dumps(metadata)
-cursor.execute('''INSERT OR IGNORE INTO experiment (exp_ID, exp_title, study_title, attributes, full_info) VALUES (?, ?, ?, ?, ?)''', (exp_id, exp_title, study_title, attributes, full_info))
 
-'''insert into organism table'''
-tax_id = metadata['Sample']['Taxon ID']
-sci_name = metadata['Sample']['Scientific Name']
-cursor.execute('''INSERT OR IGNORE INTO organism (tax_ID, sci_name) VALUES (?, ?)''', (tax_id, sci_name))
+"""path configs"""
+output_directory = '/PATH/TO/XML/DOWNLOADS'
+additions_directory = './pmid-additions.txt'
+db_directory = './intronomicon.db'
 
-'''insert into runs table'''
-for run in metadata['Run Set']['Run Details']:
-	run_id = run['Run Accession Number']
-	bases = int(run['Bases'])
-	spots = int(run['Spots'])
-	file_size = int(run['Size'])
-	cursor.execute('''INSERT OR IGNORE INTO runs (run_ID, exp_ID, bases, spots, file_size) VALUES (?, ?, ?, ?, ?)''', (run_id, exp_id, bases, spots, file_size))
+"""get pmids"""
+with open(additions_directory, 'r') as infile:
+	pmids = [line.strip() for line in infile]
 
-connection.commit()
-connection.close()
+f_count = 0
+
+"""parse xml and insert to db"""
+for pmid in pmids:
+	xml_path = os.path.join(output_directory, f"{pmid}.xml")
+	if os.path.exists(xml_path):
+		print(f"Parsing XML file: {xml_path}")
+		with open(xml_path, 'r', encoding='utf-8') as xml_file:
+			xml_text = xml_file.read()
+		metadata = parse_sep_xml(xml_text)
+		if metadata is None:
+			with open('./error_log_populate_db.txt', 'a') as error_log_file:
+				error_log_file.write(f"{pmid}.xml\n")
+			f_count += 1
+			continue
+
+		# Print json to stdout
+		"""print(json.dumps(metadata, ensure_ascii=False, indent=4))"""
+
+		# Output to json file
+		"""
+		json_directory = f'./metadata{pmid}.json'
+		with open(json_directory, 'w', encoding="utf-8") as json_outfile:
+			json.dump(metadata, json_outfile, ensure_ascii=False, indent=4)
+		"""
+
+		# Insert metadata to db
+		insert_metadata_to_db(db_directory, metadata)
+	else:
+		print(f"File not found: {xml_path}")
+
+"""summary"""
+print("----Processing complete----")
+print(f"Successful entries: {len(pmids)-f_count}\nFailed entries: {f_count}")
+print("Please check error_log_populate_db.txt for details")

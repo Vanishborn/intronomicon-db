@@ -1,5 +1,8 @@
 
+.DS_Store
 /build
 pmid-*
 exp.py
-.DS_Store
+*.json
+error*
+*.db

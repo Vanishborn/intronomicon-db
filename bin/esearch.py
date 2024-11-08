@@ -1,7 +1,7 @@
 # get a list of PMIDs filtered by keys using eSearch
 
 __author__ = "Henry Li"
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __status__ = "Development"
 
 

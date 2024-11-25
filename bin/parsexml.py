@@ -170,6 +170,7 @@ def insert_metadata_to_db(db_directory, metadata):
 
 
 """path configs"""
+# TODO
 output_directory = '/PATH/TO/XML/DOWNLOADS'
 additions_directory = './pmid-additions.txt'
 db_directory = './intronomicon.db'

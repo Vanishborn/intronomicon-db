@@ -1,5 +1,7 @@
 # Intronomicon DB
 
+**DEPRECATED** - This prototype has served its purpose and its main components and designs are now integrated into the official [Project Intronomicon](https://github.com/KorfLab/intronomicon) at [The Korf Lab](https://github.com/KorfLab) effective Nov. 24, 2024.
+
 This is the database dev repo for Project Intronomicon from The Korf Lab. Developed by Henry Li in collaboration with Ian Korf and Lilith Marinho-Davis.
 
 ## Background
